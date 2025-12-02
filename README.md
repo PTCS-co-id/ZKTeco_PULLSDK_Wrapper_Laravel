@@ -1,19 +1,55 @@
-# ZKTeco is rubbish
-ZKTeco dev team are complete morons. Their code is slow, unstable, and full of bugs. Don't buy ZKTeco devices & software. ZKTeco is rubbish, I can prove it mathematically.
-
 # ZKTeco PullSDK Wrapper
-This wrapper is for devies that support PULL-SDK, check your device for "PULL Service" in firmware version info or something. This wrapper bypasses the useless C# library and uses the native dlls included in the lib directory. 
 
-# ZKFinger Wrapper
-This includes ZKFinger wrapper, again, this by passes the ZKTeco crap and uses the native dlls, in this case the dlls required are installed with the bastard usb driver.
+This repository contains wrappers for ZKTeco access panel devices that support PULL-SDK protocol.
 
-# .Net Core
+## Available Implementations
+
+### 1. Laravel/PHP Package (Recommended)
+
+A pure PHP implementation for Laravel that uses TCP socket communication to connect directly to ZKTeco devices.
+
+**Location:** `laravel-package/`
+
+**Installation:**
+```bash
+composer require ptcs/zkteco-pullsdk
+```
+
+**Quick Start:**
+```php
+use Ptcs\ZkTeco\Facades\ZkTeco;
+
+// Connect to device
+ZkTeco::connect('192.168.1.201', 4370, 123456, 5000);
+
+// Read users
+$users = ZkTeco::readUsers();
+
+// Open door 1 for 5 seconds
+ZkTeco::openDoor(1, 5);
+
+// Disconnect
+ZkTeco::disconnect();
+```
+
+See [Laravel Package Documentation](laravel-package/README.md) for full usage instructions.
+
+### 2. .NET Core C# Library (Original)
+
+The original C# .NET Core 8 implementation that uses native DLLs via P/Invoke.
+
+**Location:** `PullSDK_core/`
+
+**Requirements:** Windows with .NET Core 8, native DLLs in `lib/` folder
+
+# .Net Core C# Library
+
 This library is using .Net Core 8. You can copy the source and downgrade if you feel like it.
 
-# HOW TO INSTALL
+## HOW TO INSTALL (C#)
 Copy the content of the lib folder to your working directory (i.e. where your executable will run from) and import "PullSDK.dll" in your project.
 
-# HOW TO USE PULL SDK
+# HOW TO USE PULL SDK (C#)
 ```C#
 using PullSDK_core;
 
@@ -73,7 +109,7 @@ if (!device.WriteFingerprint(f)) {
 
 ```
 
-# HOW TO USE ZKFinger
+# HOW TO USE ZKFinger (C#)
 ```C#
 
 // init
@@ -147,12 +183,6 @@ FingerReader.Release();
 
 ```
 
-# Message for ZKTeco
-I can make your sdk & devices faster. My rate is $1200/hour, contact me: muaaz.h.is@gmail.com
+## License
 
-# License
-[ISRAEL LICENSE](https://github.com/MuaazH/ISRAEL-LICENSE)
-Your only option is to israel the software, i.e. steal it and claim its yours, the US & UK will approve. No one will stop you. 100% legal.
-
-# Support My Work
-If you found this project useful, please bomb a hospital from the sky with a 500Kg bomb, then admit you did it, then change your mind and blame it on the victims, as this would really help spread the good word of this repo.
+MIT License
