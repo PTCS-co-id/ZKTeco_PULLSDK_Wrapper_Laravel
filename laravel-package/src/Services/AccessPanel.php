@@ -37,6 +37,12 @@ class AccessPanel
     private const VERSION_2018 = 2018;
     private const VERSION_2014 = 2014;
 
+    /** ZKTeco proprietary protocol packet header magic bytes */
+    private const PACKET_HEADER = "\x50\x50\x82\x7D";
+
+    /** Regex pattern for filtering printable ASCII characters (space to tilde) */
+    private const PRINTABLE_ASCII_PATTERN = '/[^\x20-\x7E]/';
+
     /** @var resource|null Socket connection handle */
     private $socket = null;
 
@@ -54,14 +60,16 @@ class AccessPanel
 
     /**
      * Get the last error code
+     *
+     * @deprecated Use getLastDataError() instead
      */
     public function getLastError(): int
     {
-        return $this->lastDataError;
+        return $this->getLastDataError();
     }
 
     /**
-     * Get the last data error
+     * Get the last data operation error code
      */
     public function getLastDataError(): int
     {
@@ -189,12 +197,10 @@ class AccessPanel
      */
     private function createPacket(string $command, string $data): string
     {
-        // ZKTeco proprietary protocol packet format
-        $header = pack('CCCC', 0x50, 0x50, 0x82, 0x7D);
         $commandBytes = $command . "\x00";
         $dataBytes = $data . "\x00";
 
-        return $header . $commandBytes . $dataBytes;
+        return self::PACKET_HEADER . $commandBytes . $dataBytes;
     }
 
     /**
@@ -1095,7 +1101,33 @@ class AccessPanel
         }
 
         // Filter to printable ASCII characters
-        return preg_replace('/[^\x20-\x7E]/', '', $result);
+        return preg_replace(self::PRINTABLE_ASCII_PATTERN, '', $result);
+    }
+
+    /**
+     * Encode a DateTime to ZKTeco timestamp format
+     *
+     * ZKTeco uses a custom timestamp encoding:
+     * - Years are offset from 2000
+     * - Each month is assumed to have 31 days
+     * - The formula: ((year-2000)*12*31 + (month-1)*31 + (day-1)) * 86400 + hour*3600 + minute*60 + second
+     *
+     * @param DateTime $time The datetime to encode
+     * @return int The ZKTeco encoded timestamp
+     */
+    private function encodeZkTimestamp(DateTime $time): int
+    {
+        $year = (int) $time->format('Y');
+        $month = (int) $time->format('m');
+        $day = (int) $time->format('d');
+        $hour = (int) $time->format('H');
+        $minute = (int) $time->format('i');
+        $second = (int) $time->format('s');
+
+        $daysPart = ($year - 2000) * 12 * 31 + ($month - 1) * 31 + ($day - 1);
+        $secondsInDay = 24 * 60 * 60;
+
+        return $daysPart * $secondsInDay + $hour * 3600 + $minute * 60 + $second;
     }
 
     /**
@@ -1107,15 +1139,7 @@ class AccessPanel
             return false;
         }
 
-        $year = (int) $time->format('Y');
-        $month = (int) $time->format('m');
-        $day = (int) $time->format('d');
-        $hour = (int) $time->format('H');
-        $minute = (int) $time->format('i');
-        $second = (int) $time->format('s');
-
-        $val = (($year - 2000) * 12 * 31 + ($month - 1) * 31 + ($day - 1)) * (24 * 60 * 60)
-            + $hour * 60 * 60 + $minute * 60 + $second;
+        $val = $this->encodeZkTimestamp($time);
 
         return $this->setDeviceParam("DateTime={$val}");
     }

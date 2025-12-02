@@ -48,7 +48,7 @@ class Fingerprint
         if ($other === null) {
             return -1;
         }
-        $c = strcmp($this->pin ?? '', $other->pin ?? '');
+        $c = strcmp($this->pin, $other->pin);
         return $c === 0 ? ($this->fingerId <=> $other->fingerId) : $c;
     }
 

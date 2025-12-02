@@ -31,8 +31,8 @@ abstract class CsvReader
 
         $result = explode(',', $line);
 
-        // Clear the line to free memory (important for large datasets)
-        $this->lines[$this->index] = null;
+        // Unset the line to free memory (important for large datasets like fingerprints)
+        unset($this->lines[$this->index]);
         $this->index++;
 
         return $result;

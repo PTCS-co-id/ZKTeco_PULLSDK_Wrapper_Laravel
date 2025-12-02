@@ -116,7 +116,7 @@ class User
         if ($other === null) {
             return 1;
         }
-        return strcmp($this->pin ?? '', $other->pin ?? '');
+        return strcmp($this->pin, $other->pin);
     }
 
     /**

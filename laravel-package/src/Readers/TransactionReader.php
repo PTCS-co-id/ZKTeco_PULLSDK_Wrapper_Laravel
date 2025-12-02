@@ -68,6 +68,13 @@ class TransactionReader extends CsvReader
 
     /**
      * Convert ZKTeco timestamp to DateTime
+     *
+     * ZKTeco uses a custom timestamp encoding where:
+     * - Years are offset from 2000
+     * - Each month is assumed to have 31 days
+     *
+     * @param int $timeCoded The encoded timestamp from ZKTeco device
+     * @return DateTime The decoded datetime
      */
     private function toDateTime(int $timeCoded): DateTime
     {
@@ -95,6 +102,8 @@ class TransactionReader extends CsvReader
                 $second
             ));
         } catch (\Exception $e) {
+            // Log invalid timestamp for debugging purposes
+            error_log("Invalid ZKTeco timestamp: {$timeCoded} - {$e->getMessage()}");
             return new DateTime('1970-01-01 00:00:00');
         }
     }
